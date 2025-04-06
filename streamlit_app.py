@@ -3,31 +3,11 @@ from streamlit_drawable_canvas import st_canvas
 from io import BytesIO
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-import pyttsx3
-import sounddevice as sd
-import wave
 import tempfile
+import os
 
 # Set title
-st.title("Interactive Sketchpad with Voice Recording")
-
-# Function to record audio from the device's microphone
-def record_audio(duration=5, fs=44100):
-    st.write("Recording... Speak now.")
-    audio_data = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='int16')
-    sd.wait()  # Wait until the recording is finished
-    return audio_data
-
-# Function to save audio data to a file
-def save_audio(audio_data):
-    # Create a temporary file to save the audio
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    with wave.open(temp_file, 'wb') as wf:
-        wf.setnchannels(2)  # Stereo
-        wf.setsampwidth(2)  # 2 bytes per sample
-        wf.setframerate(44100)
-        wf.writeframes(audio_data)
-    return temp_file.name
+st.title("Interactive Sketchpad")
 
 # Sidebar for configuration
 st.sidebar.title("Settings")
@@ -60,32 +40,6 @@ canvas_result = st_canvas(
     key="canvas",
 )
 
-# Initialize session state for audio recording
-if 'recording' not in st.session_state:
-    st.session_state.recording = False
-
-if st.sidebar.button("Start Recording") and not st.session_state.recording:
-    st.session_state.recording = True
-    st.session_state.audio_data = sd.rec(int(1000000), samplerate=44100, channels=2, dtype='int16')
-    st.write("Recording... Speak now.")
-
-if st.sidebar.button("Stop Recording") and st.session_state.recording:
-    st.session_state.recording = False
-    sd.stop()  # Stop the recording
-    st.write("Recording stopped.")
-    
-    # Save the audio to a file
-    audio_file = save_audio(st.session_state.audio_data)
-    
-    # Provide download button for the audio file
-    with open(audio_file, "rb") as f:
-        st.sidebar.download_button(
-            label="Download Audio Note",
-            data=f,
-            file_name="audio_note.wav",
-            mime="audio/wav"
-        )
-
 # Button to add text to canvas
 if add_text_button and text_input:
     # Display the text on the canvas as an image overlay
@@ -105,18 +59,15 @@ if add_text_button and text_input:
     text_position = ((canvas_image.width - text_width) // 2, canvas_image.height - text_height - 10)
     draw.text(text_position, text_input, fill=text_color, font=font)
 
-    # Convert the image to a buffer for downloading
-    buffered = BytesIO()
-    canvas_image.save(buffered, format="PNG")
-    img_data = buffered.getvalue()
+    # Save the image to a temporary directory and generate a URL
+    temp_dir = "temp_downloads"
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file_path = os.path.join(temp_dir, "sketch_with_text.png")
+    canvas_image.save(temp_file_path)
 
-    # Provide download button for the sketch with text
-    st.sidebar.download_button(
-        label="Download Sketch with Text",
-        data=img_data,
-        file_name="sketch_with_text.png",
-        mime="image/png"
-    )
+    # Provide download button with a direct URL to the file
+    file_url = f"/{temp_file_path}"
+    st.sidebar.markdown(f"[Download Sketch with Text](file://{file_url})")
 
 # Option to download the raw sketch without text
 if canvas_result.image_data is not None:
@@ -127,14 +78,16 @@ if canvas_result.image_data is not None:
     pil_image.save(buffered, format="PNG")
     img_data = buffered.getvalue()
 
-    # Provide a download button for the raw sketch
-    st.sidebar.download_button(
-        label="Download Sketch",
-        data=img_data,
-        file_name="sketch.png",
-        mime="image/png"
-    )
-    
+    # Save the raw image to a temporary directory and generate a URL
+    temp_dir = "temp_downloads"
+    os.makedirs(temp_dir, exist_ok=True)
+    raw_file_path = os.path.join(temp_dir, "sketch.png")
+    pil_image.save(raw_file_path)
+
+    # Provide download button with a direct URL to the file
+    file_url = f"/{raw_file_path}"
+    st.sidebar.markdown(f"[Download Raw Sketch](file://{file_url})")
+
 st.markdown("""
 <br><br>
 🌟✨ **2025 April** ✨🌟  

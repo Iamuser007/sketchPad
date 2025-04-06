@@ -4,30 +4,11 @@ from io import BytesIO
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import pyttsx3
-import sounddevice as sd
 import wave
 import tempfile
 
 # Set title
-st.title("Interactive Sketchpad with Voice Recording")
-
-# Function to record audio from the device's microphone
-def record_audio(duration=5, fs=44100):
-    st.write("Recording... Speak now.")
-    audio_data = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='int16')
-    sd.wait()  # Wait until the recording is finished
-    return audio_data
-
-# Function to save audio data to a file
-def save_audio(audio_data):
-    # Create a temporary file to save the audio
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    with wave.open(temp_file, 'wb') as wf:
-        wf.setnchannels(2)  # Stereo
-        wf.setsampwidth(2)  # 2 bytes per sample
-        wf.setframerate(44100)
-        wf.writeframes(audio_data)
-    return temp_file.name
+st.title("Interactive Sketchpad")
 
 # Sidebar for configuration
 st.sidebar.title("Settings")
@@ -59,32 +40,6 @@ canvas_result = st_canvas(
     drawing_mode="freedraw",
     key="canvas",
 )
-
-# Initialize session state for audio recording
-if 'recording' not in st.session_state:
-    st.session_state.recording = False
-
-if st.sidebar.button("Start Recording") and not st.session_state.recording:
-    st.session_state.recording = True
-    st.session_state.audio_data = sd.rec(int(1000000), samplerate=44100, channels=2, dtype='int16')
-    st.write("Recording... Speak now.")
-
-if st.sidebar.button("Stop Recording") and st.session_state.recording:
-    st.session_state.recording = False
-    sd.stop()  # Stop the recording
-    st.write("Recording stopped.")
-    
-    # Save the audio to a file
-    audio_file = save_audio(st.session_state.audio_data)
-    
-    # Provide download button for the audio file
-    with open(audio_file, "rb") as f:
-        st.sidebar.download_button(
-            label="Download Audio Note",
-            data=f,
-            file_name="audio_note.wav",
-            mime="audio/wav"
-        )
 
 # Button to add text to canvas
 if add_text_button and text_input:
@@ -134,7 +89,8 @@ if canvas_result.image_data is not None:
         file_name="sketch.png",
         mime="image/png"
     )
-    
+
+# Footer
 st.markdown("""
 <br><br>
 🌟✨ **2025 April** ✨🌟  

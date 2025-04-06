@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 import pyttsx3
 import wave
 import tempfile
+import base64
+import streamlit.components.v1 as components
 
 # Set title
 st.title("Interactive Sketchpad")
@@ -41,6 +43,11 @@ canvas_result = st_canvas(
     key="canvas",
 )
 
+# Function to trigger the download via a base64 URL
+def trigger_download(file_data, file_name):
+    download_link = f'<a href="data:image/png;base64,{file_data}" download="{file_name}">Click here to download your file</a>'
+    components.html(download_link, height=0)
+
 # Button to add text to canvas
 if add_text_button and text_input:
     # Display the text on the canvas as an image overlay
@@ -64,14 +71,10 @@ if add_text_button and text_input:
     buffered = BytesIO()
     canvas_image.save(buffered, format="PNG")
     img_data = buffered.getvalue()
+    img_base64 = base64.b64encode(img_data).decode("utf-8")
 
-    # Provide download button for the sketch with text
-    st.sidebar.download_button(
-        label="Download Sketch with Text",
-        data=img_data,
-        file_name="sketch_with_text.png",
-        mime="image/png"
-    )
+    # Trigger the download link
+    trigger_download(img_base64, "sketch_with_text.png")
 
 # Option to download the raw sketch without text
 if canvas_result.image_data is not None:
@@ -81,14 +84,10 @@ if canvas_result.image_data is not None:
     buffered = BytesIO()
     pil_image.save(buffered, format="PNG")
     img_data = buffered.getvalue()
+    img_base64 = base64.b64encode(img_data).decode("utf-8")
 
-    # Provide a download button for the raw sketch
-    st.sidebar.download_button(
-        label="Download Sketch",
-        data=img_data,
-        file_name="sketch.png",
-        mime="image/png"
-    )
+    # Provide a download link for the raw sketch
+    trigger_download(img_base64, "sketch.png")
 
 # Footer
 st.markdown("""

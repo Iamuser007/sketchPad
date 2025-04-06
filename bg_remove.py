@@ -137,7 +137,7 @@ if my_upload is not None:
         fix_image(upload=my_upload)
 else:
     # Try default images in order of preference
-    default_images = ["./zebra.jpg", "./wallaby.png"]
+    default_images = ["./mama1.jpg", "./mama2.png"]
     for img_path in default_images:
         if os.path.exists(img_path):
             fix_image(img_path)

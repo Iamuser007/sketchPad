@@ -1,0 +1,16 @@
+tempfile
+streamlit
+streamlit_drawable_canvas
+io
+numpy
+PIL
+pyttsx3
+sounddevice
+wave
+qrcode
+pywhatkit
+rembg
+base64
+os
+traceback
+time

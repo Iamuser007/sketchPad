@@ -7,7 +7,9 @@ import base64
 import os
 import traceback
 import time
+
 st.set_page_config(layout="wide", page_title="Image Background Remover")
+
 # Trigger JavaScript function to open the file picker
 st.markdown("""
     <script>
@@ -27,8 +29,6 @@ st.markdown("""
         }
     </script>
     """, unsafe_allow_html=True)
-
-
 
 st.write("## Remove background from your image")
 st.write(
@@ -123,10 +123,6 @@ def fix_image(upload):
         print(f"Error in fix_image: {traceback.format_exc()}")
 
 col1, col2 = st.columns(2)
-
-# # Custom Browse button in sidebar to trigger JS
-# if st.sidebar.button('Browse Files'):
-#     st.markdown('<script>triggerFilePicker();</script>', unsafe_allow_html=True)
 
 # File uploader widget for uploading image
 my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])

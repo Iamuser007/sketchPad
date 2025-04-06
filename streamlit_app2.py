@@ -1,7 +1,7 @@
 import streamlit as st
 import qrcode
 from PIL import Image
-import pywhatkit as kit
+# import pywhatkit as kit
 from io import BytesIO
 
 # Function to generate QR code based on input type

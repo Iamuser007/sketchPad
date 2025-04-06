@@ -8,3 +8,4 @@ wave
 qrcode
 pywhatkit
 rembg
+onnxruntime

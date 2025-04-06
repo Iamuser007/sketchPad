@@ -73,7 +73,15 @@ if add_text_button and text_input:
     img_data = buffered.getvalue()
     img_base64 = base64.b64encode(img_data).decode("utf-8")
 
-    # Trigger the download link
+    # Provide the download button for the sketch with text
+    st.sidebar.download_button(
+        label="Download Sketch with Text",
+        data=img_data,
+        file_name="sketch_with_text.png",
+        mime="image/png"
+    )
+
+    # Trigger the download link for the sketch with text
     trigger_download(img_base64, "sketch_with_text.png")
 
 # Option to download the raw sketch without text
@@ -86,7 +94,15 @@ if canvas_result.image_data is not None:
     img_data = buffered.getvalue()
     img_base64 = base64.b64encode(img_data).decode("utf-8")
 
-    # Provide a download link for the raw sketch
+    # Provide the download button for the raw sketch
+    st.sidebar.download_button(
+        label="Download Sketch",
+        data=img_data,
+        file_name="sketch.png",
+        mime="image/png"
+    )
+
+    # Trigger the download link for the raw sketch
     trigger_download(img_base64, "sketch.png")
 
 # Footer

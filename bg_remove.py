@@ -124,9 +124,9 @@ def fix_image(upload):
 
 col1, col2 = st.columns(2)
 
-# Custom Browse button in sidebar to trigger JS
-if st.sidebar.button('Browse Files'):
-    st.markdown('<script>triggerFilePicker();</script>', unsafe_allow_html=True)
+# # Custom Browse button in sidebar to trigger JS
+# if st.sidebar.button('Browse Files'):
+#     st.markdown('<script>triggerFilePicker();</script>', unsafe_allow_html=True)
 
 # File uploader widget for uploading image
 my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])

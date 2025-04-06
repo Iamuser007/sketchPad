@@ -7,7 +7,7 @@ import base64
 import os
 import traceback
 import time
-
+st.set_page_config(layout="wide", page_title="Image Background Remover")
 # Trigger JavaScript function to open the file picker
 st.markdown("""
     <script>
@@ -28,7 +28,7 @@ st.markdown("""
     </script>
     """, unsafe_allow_html=True)
 
-st.set_page_config(layout="wide", page_title="Image Background Remover")
+
 
 st.write("## Remove background from your image")
 st.write(

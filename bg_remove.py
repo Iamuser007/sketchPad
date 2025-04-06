@@ -118,6 +118,8 @@ def fix_image(upload):
 
 # UI Layout
 col1, col2 = st.columns(2)
+
+# File uploader widget for uploading image
 my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 
 # Information about limitations
@@ -144,7 +146,6 @@ else:
             break
     else:
         st.info("Please upload an image to get started!")
-
 
 st.markdown("""
 <br><br>

@@ -4,7 +4,6 @@ from io import BytesIO
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import tempfile
-import os
 
 # Set title
 st.title("Interactive Sketchpad")
@@ -59,15 +58,18 @@ if add_text_button and text_input:
     text_position = ((canvas_image.width - text_width) // 2, canvas_image.height - text_height - 10)
     draw.text(text_position, text_input, fill=text_color, font=font)
 
-    # Save the image to a temporary directory and generate a URL
-    temp_dir = "temp_downloads"
-    os.makedirs(temp_dir, exist_ok=True)
-    temp_file_path = os.path.join(temp_dir, "sketch_with_text.png")
-    canvas_image.save(temp_file_path)
+    # Save the image to a BytesIO buffer
+    buffered = BytesIO()
+    canvas_image.save(buffered, format="PNG")
+    img_data = buffered.getvalue()
 
-    # Provide download button with a direct URL to the file
-    file_url = f"/{temp_file_path}"
-    st.sidebar.markdown(f"[Download Sketch with Text](file://{file_url})")
+    # Provide download button for the sketch with text
+    st.sidebar.download_button(
+        label="Download Sketch with Text",
+        data=img_data,
+        file_name="sketch_with_text.png",
+        mime="image/png"
+    )
 
 # Option to download the raw sketch without text
 if canvas_result.image_data is not None:
@@ -78,15 +80,15 @@ if canvas_result.image_data is not None:
     pil_image.save(buffered, format="PNG")
     img_data = buffered.getvalue()
 
-    # Save the raw image to a temporary directory and generate a URL
-    temp_dir = "temp_downloads"
-    os.makedirs(temp_dir, exist_ok=True)
-    raw_file_path = os.path.join(temp_dir, "sketch.png")
-    pil_image.save(raw_file_path)
+    # Provide download button for the raw sketch
+    st.sidebar.download_button(
+        label="Download Raw Sketch",
+        data=img_data,
+        file_name="sketch.png",
+        mime="image/png"
+    )
 
-    # Provide download button with a direct URL to the file
-    file_url = f"/{raw_file_path}"
-    st.sidebar.markdown(f"[Download Raw Sketch](file://{file_url})")
+# To make the download function accessible, no change is needed. The browser will handle the download automatically.
 
 st.markdown("""
 <br><br>

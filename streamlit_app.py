@@ -3,22 +3,18 @@ from streamlit_drawable_canvas import st_canvas
 from io import BytesIO
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-import pyttsx3
-import wave
-import tempfile
 import base64
 import streamlit.components.v1 as components
 
-# Set title
+# Title
 st.title("Interactive Sketchpad")
 
-# Sidebar for configuration
+# Sidebar settings
 st.sidebar.title("Settings")
 background_color = st.sidebar.selectbox(
     "Select background color", ["White", "Light Grey", "Custom"]
 )
 
-# Set the background color based on user's choice
 if background_color == "Light Grey":
     bg_color = "#d3d3d3"
 elif background_color == "Custom":
@@ -26,13 +22,13 @@ elif background_color == "Custom":
 else:
     bg_color = "#ffffff"
 
-# Text input for adding text to the canvas
+# Text options
 text_input = st.sidebar.text_area("Add text to your sketch:")
 text_color = st.sidebar.color_picker("Pick a text color", "#000000")
 font_size = st.sidebar.slider("Select font size", 10, 50, 20)
 add_text_button = st.sidebar.button("Add Text to Sketch")
 
-# Create a drawing canvas where users can draw
+# Canvas
 canvas_result = st_canvas(
     stroke_color="black",
     stroke_width=2,
@@ -43,67 +39,69 @@ canvas_result = st_canvas(
     key="canvas",
 )
 
-# Function to trigger the download via a base64 URL
+# Helper to create download link
 def trigger_download(file_data, file_name):
-    download_link = f'<a href="data:image/png;base64,{file_data}" download="{file_name}">Click here to download your file</a>'
+    download_link = f'''
+        <a href="data:image/png;base64,{file_data}" 
+           download="{file_name}" 
+           style="display:none;" 
+           id="autoDownload"></a>
+        <script>
+            document.getElementById("autoDownload").click();
+        </script>
+    '''
     components.html(download_link, height=0)
 
-# Button to add text to canvas
-if add_text_button and text_input:
-    # Display the text on the canvas as an image overlay
-    canvas_image = Image.fromarray(canvas_result.image_data.astype(np.uint8))
-
-    # Initialize ImageDraw
-    draw = ImageDraw.Draw(canvas_image)
-
-    # Add the text under the sketch
-    font = ImageFont.load_default()
-
-    # Calculate the text size using textbbox (Bounding Box)
-    bbox = draw.textbbox((0, 0), text_input, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
-
-    text_position = ((canvas_image.width - text_width) // 2, canvas_image.height - text_height - 10)
-    draw.text(text_position, text_input, fill=text_color, font=font)
-
-    # Convert the image to a buffer for downloading
-    buffered = BytesIO()
-    canvas_image.save(buffered, format="PNG")
-    img_data = buffered.getvalue()
-    img_base64 = base64.b64encode(img_data).decode("utf-8")
-
-    # Provide the download button for the sketch with text
-    st.sidebar.download_button(
-        label="Download Sketch with Text",
-        data=img_data,
-        file_name="sketch_with_text.png",
-        mime="image/png"
-    )
-
-    # Trigger the download link for the sketch with text
-    trigger_download(img_base64, "sketch_with_text.png")
-
-# Option to download the raw sketch without text
+# If canvas has content
 if canvas_result.image_data is not None:
-    pil_image = Image.fromarray(canvas_result.image_data.astype(np.uint8))
+    raw_image = Image.fromarray(canvas_result.image_data.astype(np.uint8))
 
-    # Save the image to a BytesIO buffer
-    buffered = BytesIO()
-    pil_image.save(buffered, format="PNG")
-    img_data = buffered.getvalue()
-    img_base64 = base64.b64encode(img_data).decode("utf-8")
+    # Save raw image to bytes
+    raw_buffer = BytesIO()
+    raw_image.save(raw_buffer, format="PNG")
+    raw_img_data = raw_buffer.getvalue()
+    raw_base64 = base64.b64encode(raw_img_data).decode("utf-8")
 
-    # Provide the download button for the raw sketch
+    # Streamlit download button
     st.sidebar.download_button(
         label="Download Sketch",
-        data=img_data,
+        data=raw_img_data,
         file_name="sketch.png",
         mime="image/png"
     )
 
-    # Trigger the download link for the raw sketch
-    trigger_download(img_base64, "sketch.png")
+    # Auto-trigger download in WebView
+    trigger_download(raw_base64, "sketch.png")
+
+    # If user clicked to add text
+    if add_text_button and text_input:
+        text_image = raw_image.copy()
+        draw = ImageDraw.Draw(text_image)
+        font = ImageFont.load_default()
+
+        bbox = draw.textbbox((0, 0), text_input, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        position = ((text_image.width - text_width) // 2, text_image.height - text_height - 10)
+
+        draw.text(position, text_input, fill=text_color, font=font)
+
+        # Save text image
+        text_buffer = BytesIO()
+        text_image.save(text_buffer, format="PNG")
+        text_img_data = text_buffer.getvalue()
+        text_base64 = base64.b64encode(text_img_data).decode("utf-8")
+
+        # Download button with text
+        st.sidebar.download_button(
+            label="Download Sketch with Text",
+            data=text_img_data,
+            file_name="sketch_with_text.png",
+            mime="image/png"
+        )
+
+        # Trigger download with text
+        trigger_download(text_base64, "sketch_with_text.png")
 
 # Footer
 st.markdown("""
